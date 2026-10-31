@@ -14,7 +14,9 @@ if (!channelSecret || !channelAccessToken) {
   process.exit(1);
 }
 
-const PHOTO_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "photos");
+const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
+// photosフォルダがあればそこ、なければ同じ場所に置いた写真を使います
+const PHOTO_DIR = fs.existsSync(path.join(ROOT_DIR, "photos")) ? path.join(ROOT_DIR, "photos") : ROOT_DIR;
 // 公開URL（Renderなら自動で入ります。うまくいかないときだけ PUBLIC_URL に書きます）
 const BASE_URL = (process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || "").replace(/\/$/, "");
 // 「兄の動画を見る」などのボタン（空なら出ません）
@@ -23,7 +25,7 @@ const link = { label: process.env.LINK_LABEL || "", url: process.env.LINK_URL ||
 const MIME = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png" };
 function listPhotos() {
   try {
-    return fs.readdirSync(PHOTO_DIR).filter((f) => MIME[path.extname(f).toLowerCase()]).sort();
+    return fs.readdirSync(PHOTO_DIR).filter((f) => MIME[path.extname(f).toLowerCase()] && !f.startsWith("icon")).sort();
   } catch { return []; }
 }
 
